@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang chủ</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="jquery-3.5.1.min.js"></script>
+    <script>
+        var socket =io("http://localhost:3000");    
+        $(document).ready(function () {
+            $("#btnReg").click(function (e) { 
+                e.preventDefault();
+                get_username=$("#txtUser").val();
+                get_username=get_username.trim();
+                if(get_username.length==0){
+                    alert("Hãy nhập tên của bạn!");
+                }
+                else{
+                //client đăng ký và gửi lên server username
+                socket.emit("client_send_username",get_username);
+                }
+            });
+            //gửi chat lên server
+            $("#btnChat,#icon-send").click(function (e) { 
+                e.preventDefault();
+                msg =$("#txtMessage").val();
+                msg=msg.trim();
+                if(msg.length>0){
+                    socket.emit("client_send_message",$("#txtMessage").val());
+                    // lấy vị trí phần tử cuối cùng rồi scroll xuống
+                    var wtf = $('.list-message');
+                    var height = wtf[0].scrollHeight;
+                    wtf.scrollTop(height);
+                }
+                $("#txtMessage").val("");
+            });
+            $(document).on("click",".add-user i",function(){
+                var id=$(this).attr("socket-id");
+                socket.emit("user_choc_socketid_khac",id);
+            });t
+          
+        });
+        //Client thông báo đăng ký thất bại
+        socket.on("server_send_register_false",function(data){
+            alert("Người dùng "+data+" đã tồn tại trên hệ thống!");
+        });
+        //Nhận đăng ký thành công từ server bao gồm username và socket id của user đó rồi truyển đến tất cả các form
+        socket.on("server_send_register_successful",function(data){
+            var str="<div class='add-user'>"+data.username+"<i socket-id='"+data.id+"' class='fa fa-hand-o-left' aria-hidden='true'></i></div>";
+            $("#list-user-online").append(str);
+           
+        });
+        //client nhận thông tin socket id của nó từ server  
+        socket.on("server_send_socket_id",function(data){
+             $(document).ready(function () {
+                $("#form-reg").attr("form-socket-id",data.id_socket);    
+                $("div[form-socket-id='"+data.id_socket+"']").hide(1000);    
+            });    
+        });
+        //Nhận messages từ server
+        socket.on("server_send_message",function(data){
+            var username="<span class='username'>"+data.Username+"</span>";
+            var msg = "<span class='message'>"+data.msg+"</span>"
+            $(".list-message").append("<div class='wp-chat'>"+username+msg+"</div>"+"<div class='clearfix'></div>");
+        });
+        //Nhận username ng chọc
+        socket.on("server_xu_ly_choc",function(data){
+            alert(data+" vừa chọc bạn !");
+        });
+    </script>
+    <link rel="stylesheet"type="text/css" href="reset.css">
+    <link rel="stylesheet"type="text/css" href="global.css">
+    <link rel="stylesheet"type="text/css" href="main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+    <div id="wrapper" class="wp-inner">
+        
+        <div class="clearfix"></div>
+        <div id="content" class="clearfix">
+            <div id="left" class="fl-left">
+                <div id="title"><span>User online</span></div>
+                <div id="list-user-online">
+                    <!-- <div class='add-user'>Phạm Giầu<i socket-id="" class='fa fa-hand-o-left' aria-hidden='true'></i></div>
+                    <div class='add-user'>Phạm Giầu<i socket-id="" class='fa fa-hand-o-left' aria-hidden='true'></i></div>
+                    <div class='add-user'>Phạm Giầu<i socket-id="" class='fa fa-hand-o-left' aria-hidden='true'></i></div>
+                    <div class='add-user'>Phạm Giầu<i socket-id="" class='fa fa-hand-o-left' aria-hidden='true'></i></div>
+                    <div class='add-user'>Phạm Giầu<i socket-id="" class='fa fa-hand-o-left' aria-hidden='true'></i></div>
+                    <div class='add-user'>Phạm Giầu<i socket-id="" class='fa fa-hand-o-left' aria-hidden='true'></i></div>
+                    <div class='add-user'>Phạm Giầu<i socket-id="" class='fa fa-hand-o-left' aria-hidden='true'></i></div>
+                    <div class='add-user'>Phạm Giầu<i socket-id="" class='fa fa-hand-o-left' aria-hidden='true'></i></div>
+                    <div class='add-user'>Phạm Giầu<i socket-id="" class='fa fa-hand-o-left' aria-hidden='true'></i></div>
+                    <div class='add-user'>Phạm Giầu<i socket-id="" class='fa fa-hand-o-left' aria-hidden='true'></i></div>
+                    <div class='add-user'>Phạm Giầu<i socket-id="" class='fa fa-hand-o-left' aria-hidden='true'></i></div>
+                    <div class='add-user'>Phạm Giầu<i socket-id="" class='fa fa-hand-o-left' aria-hidden='true'></i></div>
+                    <div class='add-user'>Phạm Giầu<i socket-id="" class='fa fa-hand-o-left' aria-hidden='true'></i></div>
+                    <div class='add-user'>Phạm Giầu<i socket-id="" class='fa fa-hand-o-left' aria-hidden='true'></i></div>
+                    <div class='add-user'>Phạm Giầu<i socket-id="" class='fa fa-hand-o-left' aria-hidden='true'></i></div>
+                    <div class='add-user'>Phạm Giầu<i socket-id="" class='fa fa-hand-o-left' aria-hidden='true'></i></div>
+                     -->
+                </div>
+                <div id="form-reg">
+                    <input type="text" name="" id="txtUser" placeholder="Username">
+                    <input type="button" id="btnReg" value="Đăng ký">
+                </div>
+            </div>
+            <div id="right"class="fl-left">
+                    <div id="top-content"><span>Chat room</span></div>
+                    <div class="clearfix"></div>
+                    <div class="list-message">
+                        <div class='wp-chat'>
+                            <span class='username'>Quang Linh</span> 
+                            <span class='message'>Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of "de Finibus Bonorum et Malorum" (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, "Lorem ipsum dolor sit amet..", comes from a line in section 1.10.32.</span>
+                        </div>
+                        <div class='clearfix'></div>
+                        <div class='wp-chat'>
+                            <span class='username'>Phạm Giầu</span> 
+                            <span class='message'>Hello tôi là Phạm Giầu</span>
+                        </div>
+                        <div class='clearfix'></div>
+                    </div>    
+                    <div id="wp-chat-right">
+                        <input type="text" name="" id="txtMessage" placeholder="Message...">
+                        <div id="wp-button-send" class="fl-right">
+                            <input type="button" id="btnChat" value="">
+                            <i id="icon-send" class="fa fa-paper-plane-o" aria-hidden="true"></i>
+                        </div> 
+                    </div>          
+            </div>
+        </div>
+        
+    </div>
+</body>
+</html>

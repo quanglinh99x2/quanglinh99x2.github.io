@@ -1,0 +1,26 @@
+/* Những class dùng chung */
+.fl-left{
+    float: left;
+}
+.fl-right{
+    float: right;
+}
+.wp-inner{
+    width: 960px;
+    margin: 0px auto;
+}
+.text-center{
+    text-align: center;
+}
+.text-justify{
+    text-align: justify;
+}
+.text-left{
+    text-align: left;
+}
+.text-right{
+    text-align: right;
+}
+.padding-df{
+    padding:0px 10px;
+}
